@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ABTestTracker.Migrations
 {
     [DbContext(typeof(ABTestContext))]
-    [Migration("20240304203539_CreateStoredProcedure")]
+    [Migration("20240305133549_CreateStoredProcedure")]
     partial class CreateStoredProcedure
     {
         /// <inheritdoc />
