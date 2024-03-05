@@ -1,5 +1,7 @@
 ﻿using ABTestTracker.DataAccess.Models;
 using ABTestTracker.DataAccess.Repository;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System;
 
 namespace ABTestTracker.Services
 {
@@ -37,15 +39,26 @@ namespace ABTestTracker.Services
                 throw;
             }
         }
+        //Determine the price group by using the Random class so that the share
+        //of the price in the experiment corresponds to the probability of randomly selecting a range.
+        //For example, a price group with a share of 75% will be selected each time when a random number
+        //falls within the range from 0 to 75, and a price group with a share of 10% will be selected when
+        //the random number is within the range from 76 to 85.
 
-        public async Task<decimal> AddDeviceToExperiment(string deviceToken)
+        public async Task<Guid> GetPriceGroupId()
         {
+            //get list of prices
             var listOfExperimentPrices = await _dataAccess.GetListOfPrices();
             Guid priceId = Guid.Empty;
-            decimal sumShare = 0;
-            decimal previusShare = 0;
 
+            //Determining upper bound of the range
+            decimal sumShare = 0;
+
+            //Determining lower bound of the range
+            decimal previusShare = 0;
             Random random = new Random();
+
+            //Determining group of price
             int groupOfPrice = random.Next(101);
 
             foreach (var price in listOfExperimentPrices)
@@ -59,6 +72,13 @@ namespace ABTestTracker.Services
 
                 previusShare = price.Share;
             }
+
+            return priceId;
+        }
+
+        public async Task<decimal> AddDeviceToExperiment(string deviceToken)
+        {
+            Guid priceId = await GetPriceGroupId();
 
             if (priceId.Equals(Guid.Empty))
             {
@@ -87,7 +107,7 @@ namespace ABTestTracker.Services
 
             }catch (Exception ex)
             {
-                Console.WriteLine("Error in GetListOfPrices");
+                Console.WriteLine($"Error in GetListOfPrices: {ex.Message}");
                 return new List<Price>();
             }
         }

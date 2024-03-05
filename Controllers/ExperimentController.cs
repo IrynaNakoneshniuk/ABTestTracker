@@ -21,6 +21,11 @@ namespace ABTestTracker.Controllers
         [HttpGet("/button-color")]
         public async Task<IActionResult> ButtonColorsExperiment(string device_token) 
         {
+            if (string.IsNullOrWhiteSpace(device_token))
+            {
+                return BadRequest();
+            }
+
             string buttonColor=string.Empty;
 
            if (await _buttonColorsExperiment.IsDeviceExistInCurrentExperiment(device_token))
@@ -38,6 +43,11 @@ namespace ABTestTracker.Controllers
         [HttpGet("/price")]
         public async Task<IActionResult> PricesExperiment(string device_token)
         {
+            if (string.IsNullOrWhiteSpace(device_token))
+            {
+                return BadRequest();
+            }
+
             decimal price;
 
             if (await _pricesExperiment.IsDeviceExistInCurrentExperiment(device_token))
@@ -50,15 +60,6 @@ namespace ABTestTracker.Controllers
             }
 
             return Ok(new { key = "price", value = price });
-        }
-
-        [HttpGet("experiments")]
-        public async Task<IActionResult> GetExperiments()
-        {
-            var listOfButtonColorExperiment = await _buttonColorsExperiment.GetListOfExperiment();
-            var listOfPricesExperiment = await _pricesExperiment.GetListOfPrices();
-
-            return Ok(new { prices = listOfPricesExperiment, buttonColors = listOfButtonColorExperiment });
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿
 using ABTestTracker.DataAccess.Models;
 using ABTestTracker.DataAccess.Repository;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ABTestTracker.Services
 {
@@ -12,6 +13,9 @@ namespace ABTestTracker.Services
         {
             _dataAccess = dataAccess;
         }
+
+        //Determining the button color group is done by obtaining the count of already added devices and adding the 
+        //current device participating in the experiment to the group with the least number of devices.
 
         public async Task<string> AddDeviceToExperiment(string deviceToken)
         {
@@ -25,9 +29,11 @@ namespace ABTestTracker.Services
 
                 foreach (var bc in listOfButtonColors)
                 {
+                    //get amount of divices for every color
                     var amountDevicesAtItem = await _dataAccess.GetAmountDevicesInBtnColorExp(bc.Value);
+                    ///Determining min value
                     if (min > amountDevicesAtItem)
-                    {
+                    { 
                         min = amountDevicesAtItem;
                         minAmountColorId = bc.Id;
                     }
