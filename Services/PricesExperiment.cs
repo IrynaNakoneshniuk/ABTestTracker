@@ -51,13 +51,18 @@ namespace ABTestTracker.Services
             foreach (var price in listOfExperimentPrices)
             {
                 sumShare += price.Share;
-                if (sumShare > previusShare && sumShare <= groupOfPrice)
+                if (sumShare > previusShare && groupOfPrice <= sumShare)
                 {
                     priceId = price.Id;
                     break;
                 }
 
                 previusShare = price.Share;
+            }
+
+            if (priceId.Equals(Guid.Empty))
+            {
+                throw new Exception("Not found group of prices!");
             }
 
             Device? device= await _dataAccess.FindDeviceByToken(deviceToken);
@@ -72,6 +77,19 @@ namespace ABTestTracker.Services
             decimal resultPrice = await _dataAccess.AddDeviceToPriceExp(device.Id, priceId);
 
             return resultPrice;
+        }
+
+        public async Task<List<Price>> GetListOfPrices()
+        {
+            try
+            { 
+                return await _dataAccess.GetListOfPrices();
+
+            }catch (Exception ex)
+            {
+                Console.WriteLine("Error in GetListOfPrices");
+                return new List<Price>();
+            }
         }
 
     }

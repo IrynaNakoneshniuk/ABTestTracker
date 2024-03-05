@@ -191,7 +191,7 @@ namespace ABTestTracker.Migrations
                                               SELECT @price = prices.value
                                               FROM devices
                                               JOIN experiment_prices  ON devices.id = experiment_prices.device_id
-                                              JOIN price  ON experiment_prices.price_id = price.id
+                                              JOIN prices  ON experiment_prices.price_id = prices.id
                                               WHERE devices.device_token = @device_token;
                                                END";
             migrationBuilder.Sql(spFindPriceByToken);

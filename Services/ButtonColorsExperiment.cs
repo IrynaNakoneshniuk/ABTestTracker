@@ -73,5 +73,18 @@ namespace ABTestTracker.Services
                 throw;
             }
         }
+
+        public async Task<List<ButtonColor>> GetListOfExperiment()
+        {
+            try
+            {
+                return await _dataAccess.GetListOfButtonColors();
+
+            }catch (Exception ex)
+            {
+                Console.WriteLine("Error GetListOfButtonColors");
+                 return new List<ButtonColor>();
+            }
+        }
     }
 }

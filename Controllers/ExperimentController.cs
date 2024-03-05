@@ -51,5 +51,14 @@ namespace ABTestTracker.Controllers
 
             return Ok(new { key = "price", value = price });
         }
+
+        [HttpGet("experiments")]
+        public async Task<IActionResult> GetExperiments()
+        {
+            var listOfButtonColorExperiment = await _buttonColorsExperiment.GetListOfExperiment();
+            var listOfPricesExperiment = await _pricesExperiment.GetListOfPrices();
+
+            return Ok(new { prices = listOfPricesExperiment, buttonColors = listOfButtonColorExperiment });
+        }
     }
 }
