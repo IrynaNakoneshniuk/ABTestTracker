@@ -1,5 +1,6 @@
 using ABTestTracker.DataAccess.Data;
 using ABTestTracker.DataAccess.Repository;
+using ABTestTracker.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,6 +15,8 @@ builder.Services.AddDbContext<ABTestContext>(option=>
 option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IRepositoryDataAccess, RepositoryDataAccess>();
+builder.Services.AddScoped<IButtonColorsExperiment, ButtonColorsExperiment>();
+builder.Services.AddScoped<IPricesExperiment, PricesExperiment>();
 
 var app = builder.Build();
 

@@ -93,33 +93,36 @@ namespace ABTestTracker.Migrations
 
             var spDeviceExistExperimentPrice = @$"CREATE PROCEDURE [dbo].[spDeviceExistExperimentPrice]
 
-                                               @device_token varchar(100)
+                                               @device_token varchar(100),
+                                               @Existence INT OUTPUT
                                                AS
                                                BEGIN
                                                IF EXISTS (SELECT 1
                                                FROM experiment_prices AS ep
                                                JOIN devices AS d ON ep.device_id = d.id
                                                WHERE d.device_token = @device_token)
-                                               SELECT 1;
+                                               SET @Existence = 1;
                                                ELSE
-                                               SELECT 0; 
+                                               SET @Existence = 0;
                                                END";
 
             migrationBuilder.Sql(spDeviceExistExperimentPrice);
 
             var spDeviceExistExperimentButtonColors = @$"CREATE PROCEDURE [dbo].[spDeviceExistExperimentButtonColors]
 
-                                               @device_token varchar(100)
-                                               AS
-                                               BEGIN
-                                               IF EXISTS (SELECT 1
-                                               FROM experiment_button_colors AS ebc
-                                               INNER JOIN devices AS d ON ebc.device_id = d.id
-                                               WHERE d.device_token = @device_token)
-                                               SELECT 1;
-                                               ELSE
-                                               SELECT 0; 
-                                               END";
+                                                     @device_token varchar(100),
+											         @Existence INT OUTPUT
+                                                     AS
+                                                     BEGIN
+                                                     IF EXISTS (
+                                                     SELECT 1
+                                                     FROM experiment_button_colors AS ebc
+                                                     INNER JOIN devices AS d ON ebc.device_id = d.id
+                                                     WHERE d.device_token = @device_token)
+                                                     SET @Existence = 1;
+                                                     ELSE
+                                                     SET @Existence = 0;
+                                                     END";
 
             migrationBuilder.Sql(spDeviceExistExperimentButtonColors);
 

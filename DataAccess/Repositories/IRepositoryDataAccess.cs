@@ -16,5 +16,7 @@ namespace ABTestTracker.DataAccess.Repository
         Task<string> FindButtonColorByDeviceToken(string deviceToken);
         Task<decimal> FindPriceByDeviceToken(string deviceToken);
         Task<string> AddDeviceToButtonColorsExp(Guid deviceId, Guid buttonColorId);
+        Task<decimal> AddDeviceToPriceExp(Guid deviceId, Guid priceId);
+        Task<Device?> FindDeviceByToken(string tokenDevice);
     }
 }

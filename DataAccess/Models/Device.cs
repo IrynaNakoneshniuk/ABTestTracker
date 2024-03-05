@@ -12,7 +12,7 @@ namespace ABTestTracker.DataAccess.Models
     {
        [Column("id")]
        [Key]
-       public Guid Guid { get; set; }
+       public Guid Id { get; set; }
 
        [Column("device_token",TypeName = "varchar(100)")]
        public required string DeviceToken { get; set; }

@@ -1,49 +1,55 @@
-﻿using ABTestTracker.DataAccess.Repository;
+﻿using ABTestTracker.DataAccess.Models;
+using ABTestTracker.DataAccess.Repository;
+using ABTestTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ABTestTracker.Controllers
 {
-    [Route("[controller]")]
+    [Route("experiment")]
     [ApiController]
     public class ExperimentController : Controller
     {
-        private readonly IRepositoryDataAccess repositoryDataAccess;
+        private readonly IButtonColorsExperiment _buttonColorsExperiment;
+        private readonly IPricesExperiment _pricesExperiment;
 
-        public ExperimentController(IRepositoryDataAccess repositoryDataAccess)
+        public ExperimentController(IButtonColorsExperiment buttonColorsExperiment, IPricesExperiment pricesExperiment)
         {
-            this.repositoryDataAccess = repositoryDataAccess;   
-        }
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-           int prices = await repositoryDataAccess.GetAmountDevicesInPriceExp(10);
-
-            return Ok(prices);
+            this._buttonColorsExperiment = buttonColorsExperiment;   
+            this._pricesExperiment = pricesExperiment;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddingPrice(decimal share,decimal price)
+        [HttpGet("/button-color")]
+        public async Task<IActionResult> ButtonColorsExperiment(string device_token) 
         {
-            await repositoryDataAccess.AddPriceForExperiment(price,share);
+            string buttonColor=string.Empty;
 
-            return Ok();
+           if (await _buttonColorsExperiment.IsDeviceExistInCurrentExperiment(device_token))
+            {
+                buttonColor=await _buttonColorsExperiment.GetColorButtonForExistDevice(device_token);
+            }
+            else
+            {
+                buttonColor = await _buttonColorsExperiment.AddDeviceToExperiment(device_token);
+            }
+          
+            return Ok(new { key = "button_color", value = buttonColor });
         }
 
-        [HttpPost ("/coloradd")]
-        public async Task<IActionResult> AddingColor(decimal share, string valueColor)
+        [HttpGet("/price")]
+        public async Task<IActionResult> PricesExperiment(string device_token)
         {
-            await repositoryDataAccess.AddButtonColorForExperiment(share, valueColor);
+            decimal price;
 
+            if (await _pricesExperiment.IsDeviceExistInCurrentExperiment(device_token))
+            {
+                price = await _pricesExperiment.GetPriceForExistDevice(device_token);
+            }
+            else
+            {
+                price = await _pricesExperiment.AddDeviceToExperiment(device_token);
+            }
 
-            return Ok();
-        }
-
-        [HttpGet("/colorget")]
-        public async Task<IActionResult> GetListColor()
-        {
-            List<DataAccess.Models.ButtonColor> prices = await repositoryDataAccess.GetListOfButtonColors();
-
-            return Ok(prices);
+            return Ok(new { key = "price", value = price });
         }
     }
 }

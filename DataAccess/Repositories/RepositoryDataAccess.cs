@@ -152,38 +152,50 @@ namespace ABTestTracker.DataAccess.Repository
             }
         }
 
-        public async Task<bool> IsDeviceExistInBtnColorExp(string tokenDevice)
+        public async Task<bool> IsDeviceExistInBtnColorExp(string deviceToken)
         {
             try
             {
-                var valueParameter = new SqlParameter("@token_device", tokenDevice);
+                var deviceTokenParameter = new SqlParameter("@device_token", deviceToken);
+                var existenceParameter = new SqlParameter
+                {
+                    ParameterName = "@Existence",
+                    SqlDbType = SqlDbType.Int,
+                    Direction = ParameterDirection.Output
+                };
 
-                int deviceExists =  await _context.Database.ExecuteSqlRawAsync(
-                $"EXEC spDeviceExistExperimentButtonColors", tokenDevice);
+                await _context.Database.ExecuteSqlRawAsync("EXEC spDeviceExistExperimentButtonColors @device_token, @Existence OUTPUT",
+                    deviceTokenParameter, existenceParameter);
 
-                return deviceExists==1;
+                return (int)existenceParameter.Value==1;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error stored procedure spDeviceExistExperimentButtonColors: {ex.Message}");
+                Console.WriteLine($"Error checking device existence: {ex.Message}");
                 throw;
             }
         }
 
-        public async Task<bool> IsDeviceExistInPriceExperiment(string tokenDevice)
+        public async Task<bool> IsDeviceExistInPriceExperiment(string deviceToken)
         {
             try
             {
-                var valueParameter = new SqlParameter("@token_device", tokenDevice);
+                var deviceTokenParameter = new SqlParameter("@device_token", deviceToken);
+                var existenceParameter = new SqlParameter
+                {
+                    ParameterName = "@Existence",
+                    SqlDbType = SqlDbType.Int,
+                    Direction = ParameterDirection.Output
+                };
 
                 int deviceExists = await _context.Database.ExecuteSqlRawAsync(
-                $"EXEC spDeviceExistExperimentPrice", tokenDevice);
+                $"EXEC spDeviceExistExperimentPrice @device_token, @Existence OUTPUT", deviceTokenParameter, existenceParameter);
 
-                return deviceExists == 1;
+                return (int)existenceParameter.Value == 1;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error stored procedure spDeviceExistExperimentButtonColors: {ex.Message}");
+                Console.WriteLine($"Error stored procedure spDeviceExistExperimentPrice: {ex.Message}");
                 throw;
             }
         }
@@ -287,6 +299,53 @@ namespace ABTestTracker.DataAccess.Repository
                 throw;
             }
         }
-    }
 
+        public async Task<decimal> AddDeviceToPriceExp(Guid deviceId, Guid priceId)
+        {
+            try
+            {
+                var priceParameter = new SqlParameter
+                {
+                    ParameterName = "@price",
+                    SqlDbType = SqlDbType.Decimal,
+                    Direction = ParameterDirection.Output
+                };
+
+                var deviceIdParameter = new SqlParameter("@device_id", deviceId);
+                var priceIdParameter = new SqlParameter("@price_id ", priceId);
+
+                await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC spCreateExperimentPrices @device_id,@price_id, @price OUTPUT",
+                    deviceIdParameter, priceIdParameter, priceParameter);
+
+                return (decimal)priceParameter.Value;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error calling stored procedure spCreateExperimentPrices: {ex.Message}");
+
+                throw;
+            }
+        }
+
+
+        public async Task<Device?> FindDeviceByToken(string tokenDevice)
+        {
+            try
+            {
+                var tokenParameter = new SqlParameter("@device_token", tokenDevice);
+
+                var devices = await _context.Devices
+                .FromSqlRaw("EXEC spFindDeviceByToken @device_token", tokenParameter)
+                .ToListAsync();
+
+                return devices.FirstOrDefault();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error calling stored procedure spFindDeviceByToken: {ex.Message}");
+                throw;
+            }
+        }
+    }
 }

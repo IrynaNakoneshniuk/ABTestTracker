@@ -1,4 +1,5 @@
 ﻿
+using ABTestTracker.DataAccess.Models;
 using ABTestTracker.DataAccess.Repository;
 
 namespace ABTestTracker.Services
@@ -17,12 +18,12 @@ namespace ABTestTracker.Services
             Guid minAmountColorId = Guid.Empty;
             var listOfButtonColors = await _dataAccess.GetListOfButtonColors();
 
-            if (listOfButtonColors != null)
+            if (listOfButtonColors != null && listOfButtonColors.Any())
             {
                 int min = await _dataAccess.GetAmountDevicesInBtnColorExp(listOfButtonColors[0].Value);
                 minAmountColorId = listOfButtonColors[0].Id;
 
-                listOfButtonColors.ForEach(async (bc) =>
+                foreach (var bc in listOfButtonColors)
                 {
                     var amountDevicesAtItem = await _dataAccess.GetAmountDevicesInBtnColorExp(bc.Value);
                     if (min > amountDevicesAtItem)
@@ -31,11 +32,18 @@ namespace ABTestTracker.Services
                         minAmountColorId = bc.Id;
                     }
                 }
-              );
             }
 
-            Guid deviceId = await _dataAccess.AddDeviceToDb(deviceToken);
-            string colorValue = await _dataAccess.AddDeviceToButtonColorsExp(deviceId, minAmountColorId);
+            Device? device = await _dataAccess.FindDeviceByToken(deviceToken);
+
+            if (device == null)
+            {
+                Guid deviceId = await _dataAccess.AddDeviceToDb(deviceToken);
+                device.Id = deviceId;
+                device.DeviceToken = deviceToken;
+            }
+          
+            string colorValue = await _dataAccess.AddDeviceToButtonColorsExp(device.Id, minAmountColorId);
 
             return colorValue;
         }
